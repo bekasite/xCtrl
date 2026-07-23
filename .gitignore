@@ -40,6 +40,9 @@ coverage/
 *.swo
 *~
 
+# Bot server runtime data
+telegram-bot/data/
+
 # Project-specific
 /favicon-package (1).zip
 /favicon-package (2).zip
