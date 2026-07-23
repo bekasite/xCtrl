@@ -1,5 +1,7 @@
 # xCtl
 
+[![Download APK](https://img.shields.io/badge/Download-APK-00B4E6?style=for-the-badge&logo=android)](https://github.com/bekasite/xCtrl/releases/download/v1.0.0/xctl.apk)
+
 SMS Remote Control for Android. Control any Android device remotely by sending SMS commands from authorized phone numbers -- no internet connection required.
 
 ## Features
