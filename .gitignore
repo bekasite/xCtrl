@@ -43,9 +43,6 @@ coverage/
 # Bot server runtime data
 telegram-bot/data/
 
-# Bot APK (tracked via Git LFS)
-!telegram-bot/public/apk/*.apk
-
 # Project-specific
 /favicon-package (1).zip
 /favicon-package (2).zip
