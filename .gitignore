@@ -1,0 +1,46 @@
+# Flutter/Dart
+/.dart_tool/
+/build/
+.dart_tool/
+*.iml
+.pub/
+.packages
+
+# IDE
+.idea/
+.vscode/
+
+# Android
+*.apk
+*.aab
+local.properties
+*.keystore
+*.jks
+
+# iOS
+Pods/
+*.xcworkspace
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Generated
+*.inject
+*.map
+
+# Coverage
+coverage/
+
+# Misc
+.DS_Store
+*.log
+*.bak
+*.swp
+*.swo
+*~
+
+# Project-specific
+/favicon-package (1).zip
+/favicon-package (2).zip
+/.flutter-plugins-dependencies
