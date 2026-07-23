@@ -59,20 +59,16 @@ async function loadDownloadUrl() {
   } catch (e) {}
 }
 
-async function linkDevice() {
-  const code = document.getElementById('link-code').value.trim();
+function showLinkResult(text, type) {
   const status = document.getElementById('link-status');
+  status.textContent = text;
+  status.className = type || '';
+}
+
+async function submitCode(code) {
   const btn = document.getElementById('link-btn');
-
-  if (!code) {
-    status.textContent = 'Enter a linking code';
-    status.className = 'error';
-    return;
-  }
-
   btn.disabled = true;
-  status.textContent = 'Linking...';
-  status.className = '';
+  showLinkResult('Linking...', '');
 
   try {
     const res = await fetch(API_BASE + '/api/link', {
@@ -82,22 +78,48 @@ async function linkDevice() {
     });
     const data = await res.json();
     if (data.ok) {
-      status.textContent = 'Linked as ' + data.linkedInfo;
-      status.className = 'success';
+      showLinkResult('Linked as ' + data.linkedInfo, 'success');
       document.getElementById('link-code').value = '';
+      return true;
     } else {
-      status.textContent = data.error || 'Link failed';
-      status.className = 'error';
+      showLinkResult(data.error || 'Link failed', 'error');
+      return false;
     }
   } catch (e) {
-    status.textContent = 'Connection error';
-    status.className = 'error';
+    showLinkResult('Connection error', 'error');
+    return false;
   } finally {
     btn.disabled = false;
+  }
+}
+
+async function linkDevice() {
+  const code = document.getElementById('link-code').value.trim();
+  if (!code) {
+    showLinkResult('Enter a linking code', 'error');
+    return;
+  }
+  await submitCode(code);
+}
+
+async function handleAutoLink() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (!code) return;
+
+  const status = document.getElementById('link-status');
+  status.textContent = 'Linking your device...';
+  status.className = '';
+  switchTab('link');
+
+  const ok = await submitCode(code);
+  if (ok) {
+    setTimeout(() => switchTab('home'), 1500);
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadCommands();
   loadDownloadUrl();
+  handleAutoLink();
 });

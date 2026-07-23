@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const db = require('./db');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -102,18 +103,14 @@ async function setWebhook() {
 
 function handleStart(chatId, username, firstName) {
   const code = db.createLinkCode(chatId, username, firstName);
+  const miniAppUrl = `${MINI_APP_URL}?code=${code}`;
 
   const message = [
     'Welcome to xCtl Bot!',
     '',
-    'xCtl lets you remotely control your Android device by sending SMS commands from authorized phone numbers -- no internet required.',
+    'Your linking code has been generated. Open the Mini App to link your device automatically.',
     '',
-    'Commands include: LOCATION, CAMERA, LOCK, WIPE, SMS, CALL, WiFi, clipboard, files, and 50+ more.',
-    '',
-    `Your linking code: ${code}`,
-    'Enter this in the Mini App or in xCtl Settings > Telegram. Expires in 5 minutes.',
-    '',
-    'More info: x-prime.dev',
+    'The code expires in 5 minutes.',
   ].join('\n');
 
   return sendMessage(chatId, message, {
@@ -121,7 +118,7 @@ function handleStart(chatId, username, firstName) {
       inline_keyboard: [[
         {
           text: 'Open xCtl Mini App',
-          web_app: { url: MINI_APP_URL },
+          web_app: { url: miniAppUrl },
         },
       ]],
     },
@@ -130,12 +127,13 @@ function handleStart(chatId, username, firstName) {
 
 function handleLink(chatId, username, firstName) {
   const code = db.createLinkCode(chatId, username, firstName);
-  return sendMessage(chatId, `Your linking code: ${code}\n\nEnter this in the Mini App or in xCtl Settings > Telegram. Expires in 5 minutes.`, {
+  const miniAppUrl = `${MINI_APP_URL}?code=${code}`;
+  return sendMessage(chatId, `Open the Mini App to link your device automatically.`, {
     reply_markup: {
       inline_keyboard: [[
         {
           text: 'Open xCtl Mini App',
-          web_app: { url: MINI_APP_URL },
+          web_app: { url: miniAppUrl },
         },
       ]],
     },
@@ -185,11 +183,23 @@ app.get('/api/commands', (req, res) => {
 });
 
 app.get('/api/config', (req, res) => {
+  let apkUrl = APK_DOWNLOAD_URL || null;
+  if (!apkUrl) {
+    try {
+      const apkDir = path.join(__dirname, 'public', 'apk');
+      if (fs.existsSync(apkDir)) {
+        const files = fs.readdirSync(apkDir).filter(f => f.endsWith('.apk'));
+        if (files.length > 0) {
+          apkUrl = `${MINI_APP_URL}/apk/${files[0]}`;
+        }
+      }
+    } catch (e) {}
+  }
   res.json({
     version: '1.0.0',
     packageName: 'dev.xprime.xctl',
     domain: 'x-prime.dev',
-    apkUrl: APK_DOWNLOAD_URL || null,
+    apkUrl,
   });
 });
 
