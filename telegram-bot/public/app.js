@@ -8,22 +8,21 @@ try {
     tg.ready();
     tg.expand();
   }
-} catch (e) {
-  // not in Telegram
-}
+} catch (e) {}
 
 function switchTab(name) {
   document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  document.querySelector(`.nav-item[data-tab="${name}"]`).classList.add('active');
+  const tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-tab="${name}"]`);
+  if (nav) nav.classList.add('active');
 }
 
 function filterCommands() {
   const q = document.getElementById('command-search').value.toLowerCase();
   document.querySelectorAll('.command-item').forEach(el => {
-    const text = el.textContent.toLowerCase();
-    el.classList.toggle('hidden', q && !text.includes(q));
+    el.classList.toggle('hidden', q && !el.textContent.toLowerCase().includes(q));
   });
 }
 
@@ -32,22 +31,17 @@ async function loadCommands() {
     const res = await fetch(API_BASE + '/api/commands');
     const data = await res.json();
     commands = data.commands || [];
-    document.getElementById('command-count').textContent = commands.length + '+';
-    renderCommands(commands);
+    const list = document.getElementById('commands-list');
+    list.innerHTML = commands.map(c =>
+      `<div class="command-item">
+        <div class="command-name">${c.name}</div>
+        <div class="command-desc">${c.desc}</div>
+      </div>`
+    ).join('');
   } catch (e) {
     document.getElementById('commands-list').innerHTML =
       '<p style="color:var(--text-secondary);font-size:13px;text-align:center;padding:20px;">Failed to load commands</p>';
   }
-}
-
-function renderCommands(cmds) {
-  const list = document.getElementById('commands-list');
-  list.innerHTML = cmds.map(c =>
-    `<div class="command-item">
-      <span class="command-name">${c.name}</span>
-      <span class="command-desc">${c.desc}</span>
-    </div>`
-  ).join('');
 }
 
 async function loadDownloadUrl() {
@@ -58,13 +52,11 @@ async function loadDownloadUrl() {
     if (data.apkUrl) {
       btn.href = data.apkUrl;
     } else {
-      btn.textContent = 'APK not available';
+      btn.textContent = 'APK not yet available';
       btn.style.pointerEvents = 'none';
       btn.style.opacity = '0.5';
     }
-  } catch (e) {
-    // use default
-  }
+  } catch (e) {}
 }
 
 async function linkDevice() {
@@ -90,7 +82,7 @@ async function linkDevice() {
     });
     const data = await res.json();
     if (data.ok) {
-      status.textContent = 'Device linked as ' + data.linkedInfo;
+      status.textContent = 'Linked as ' + data.linkedInfo;
       status.className = 'success';
       document.getElementById('link-code').value = '';
     } else {
